@@ -4,7 +4,7 @@
 
 HiveLoop is a single-page, no-login guide to everything happening on the [Hive blockchain](https://hive.io): all current challenges, contests and power-up days from across Hive's communities in one live place — so nobody has to search everywhere to find out what they can join.
 
-🌐 **Live site:** enable GitHub Pages for this repo (Settings → Pages → deploy from `main`) or open `index.html` in any browser.
+🌐 **Live site:** https://arslankalri.github.io/hive-loop/ (GitHub Pages, served from this repo's `main` branch)
 
 ## What it does
 
