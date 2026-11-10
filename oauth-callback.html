@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arslan App — sign-in return</title>
+<style>
+  body{font-family:system-ui,sans-serif;background:#0e1116;color:#e6edf3;margin:0;padding:24px}
+  .card{max-width:640px;margin:8vh auto;background:#161b22;border:1px solid #30363d;border-radius:12px;padding:24px}
+  h1{font-size:20px;margin:0 0 8px}
+  p{color:#9da7b1;line-height:1.5}
+  .code{font-family:ui-monospace,monospace;font-size:15px;word-break:break-all;background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:14px;margin:14px 0;color:#7ee787}
+  button{background:#238636;color:#fff;border:0;border-radius:8px;padding:10px 16px;font-size:15px;cursor:pointer}
+  .err{color:#ff7b72}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Sign-in return page</h1>
+  <p id="msg">Reading the result from HiveSigner…</p>
+  <div class="code" id="box" style="display:none"></div>
+  <button id="copy" style="display:none">Copy</button>
+  <p id="hint" style="display:none">Send this code to Muse in your chat. It is single-use and useless without the app secret, which never leaves the secure vault.</p>
+</div>
+<script>
+  var q = new URLSearchParams(location.search);
+  var h = new URLSearchParams(location.hash.replace(/^#/, ''));
+  function get(k){ return q.get(k) || h.get(k); }
+  var box = document.getElementById('box'), msg = document.getElementById('msg'),
+      copy = document.getElementById('copy'), hint = document.getElementById('hint');
+  var code = get('code'), token = get('access_token'), err = get('error_description') || get('error');
+  var value = code || token;
+  if (err) { msg.innerHTML = '<span class="err">HiveSigner returned an error:</span>'; box.style.display='block'; box.textContent = err; }
+  else if (value) {
+    msg.textContent = code ? 'Authorization complete. Your one-time code:' : 'Authorization complete. Your token:';
+    box.style.display='block'; box.textContent = value; copy.style.display='inline-block'; hint.style.display='block';
+    copy.onclick = function(){ navigator.clipboard.writeText(value); copy.textContent='Copied ✓'; };
+  } else { msg.textContent = 'Nothing here yet. This page is the return address for the Arslan App HiveSigner sign-in.'; }
+</script>
+</body>
+</html>
