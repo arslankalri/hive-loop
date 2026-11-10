@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HiveLoop Publisher</title>
+<style>
+  body{font-family:system-ui,sans-serif;background:#0e1116;color:#e6edf3;margin:0;padding:20px}
+  .wrap{max-width:760px;margin:0 auto}
+  button{background:#238636;color:#fff;border:0;border-radius:8px;padding:10px 16px;font-size:15px;cursor:pointer;margin:6px 6px 6px 0}
+  textarea{width:100%;background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:8px;padding:10px;font-family:ui-monospace,monospace;font-size:13px}
+  pre{white-space:pre-wrap;word-break:break-all;background:#161b22;border:1px solid #30363d;border-radius:8px;padding:12px;min-height:60px}
+  #status{color:#9da7b1;margin:8px 0 14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h2>HiveLoop Publisher</h2>
+  <div id="status">…</div>
+  <button id="signin">Sign in with HiveSigner</button>
+  <button id="me">Check session (/api/me)</button>
+  <p>Operations JSON:</p>
+  <textarea id="ops" rows="10" placeholder='[["vote",{"voter":"arslanjapani","author":"someone","permlink":"a-post","weight":10000}]]'></textarea>
+  <br>
+  <button id="cast">Broadcast</button>
+  <pre id="out"></pre>
+</div>
+<script>
+  var CB = location.origin + location.pathname;
+  function tok(){ return localStorage.getItem('hl_token'); }
+  (function(){
+    var q = new URLSearchParams(location.search);
+    var h = new URLSearchParams(location.hash.replace(/^#/, ''));
+    var t = q.get('access_token') || h.get('access_token');
+    if (t) { localStorage.setItem('hl_token', t); history.replaceState({}, '', CB); }
+    document.getElementById('status').textContent = tok()
+      ? 'Token stored in this browser. Ready to broadcast.'
+      : 'No token yet — sign in first.';
+  })();
+  document.getElementById('signin').onclick = function(){
+    location.href = 'https://hivesigner.com/oauth2/authorize?client_id=hiveloop&redirect_uri=' +
+      encodeURIComponent(CB) + '&scope=posting&state=pub';
+  };
+  async function api(path, opts){
+    var out = document.getElementById('out');
+    try {
+      var r = await fetch('https://hivesigner.com/api' + path, Object.assign(
+        {headers:{'Authorization': tok() || '', 'Content-Type':'application/json'}}, opts || {}));
+      out.textContent = path + ' -> HTTP ' + r.status + '\n' + (await r.text());
+    } catch(e) { out.textContent = path + ' -> FETCH ERROR: ' + e.message; }
+  }
+  document.getElementById('me').onclick = function(){ api('/me'); };
+  document.getElementById('cast').onclick = function(){
+    var ops;
+    try { ops = JSON.parse(document.getElementById('ops').value); }
+    catch(e){ document.getElementById('out').textContent = 'Bad JSON: ' + e.message; return; }
+    api('/broadcast', {method:'POST', body: JSON.stringify({operations: ops})});
+  };
+</script>
+</body>
+</html>
